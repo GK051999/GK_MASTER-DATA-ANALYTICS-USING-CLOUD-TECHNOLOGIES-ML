@@ -1,0 +1,173 @@
+create or replace database gk_Bikestore;
+use gk_Bikestore;
+
+create schema sales;
+
+create schema production;
+
+-------------------Creating Table Of Production Schema-----------------------------------------------
+
+CREATE OR REPLACE TABLE PRODUCTION.BRANDS (
+BRAND_ID INT PRIMARY KEY,
+BRAND_NAME VARCHAR(200) NOT NULL
+);
+
+SELECT * FROM PRODUCTION.BRANDS;
+
+CREATE OR REPLACE TABLE PRODUCTION.PRODUCTS(
+PRODUCT_ID INT PRIMARY KEY,
+PRODUCT_NAME VARCHAR(80),
+BRAND_ID INT,
+CATEGORY_ID INT,
+MODEL_YEAR INT,
+LIST_PRICE INT);
+
+
+DROP TABLE PRODUCTION.STOCKS;
+
+CREATE OR REPLACE TABLE PRODUCTION.STOCKS(
+STORE_ID INT ,
+PRODUCT_ID INT,
+QUANTITY INT,
+PRIMARY KEY (STORE_ID, PRODUCT_ID));
+
+CREATE OR REPLACE TABLE PRODUCTION.CATEGORIES (
+CATEGORY_ID INT primary KEY,
+CATEGORY_NAME VARCHAR(100));
+
+
+--------------------------creating Table of Sales Schema----------------------------------------
+
+DROP TABLE SALES.CUSTOMERS;
+
+CREATE OR REPLACE TABLE SALES.CUSTOMERS(
+CUSTOMER_ID INT IDENTITY(1,1) PRIMARY KEY,
+FIRST_NAME VARCHAR(15),
+LAST_NAME VARCHAR(15),
+PHONE VARCHAR(20),
+EMAIL VARCHAR(100),
+STREET VARCHAR(30),
+CITY VARCHAR(25),
+STATE VARCHAR(25),
+ZIP_CODE INT );
+
+
+DROP TABLE SALES.ORDERS;
+
+CREATE OR REPLACE TABLE SALES.ORDERS(
+ORDER_ID INT IDENTITY(1,1) PRIMARY KEY,
+CUSTOMER_ID INT,
+ORDER_STATUS INT,
+ORDER_DATE DATE,
+REQUIRED_DATE DATE,
+SHIPPED_DATE VARCHAR(15),
+STORE_ID INT,
+STAFF_ID INT );
+
+
+DROP table sales.STORES;
+
+CREATE OR REPLACE TABLE SALES.STORES(
+STORE_ID INT IDENTITY(1,1) PRIMARY KEY  ,
+STORE_NAME VARCHAR(20),
+PHONE varchar(20),
+EMAIL VARCHAR(100),
+STREET VARCHAR(25),
+CITY VARCHAR(20),
+STATE VARCHAR(20),
+ZIP_CODE INT );
+
+ DROP TABLE SALES.ORDER_ITEMS;
+ 
+ CREATE OR REPLACE TABLE SALES.ORDER_ITEMS(
+ORDER_ID INT ,
+ITEM_ID INT ,
+PRODUCT_ID INT,
+QUANTITY INT,
+LIST_PRICE INT,
+DISCOUNT INT,
+PRIMARY KEY (ORDER_ID,ITEM_ID));
+
+SELECT * FROM SALES.ORDER_ITEMS;
+
+ 
+
+
+DROP TABLE SALES.STAFFS ;
+
+CREATE OR REPLACE TABLE SALES.STAFFS (
+STAFF_ID INT IDENTITY(1,1) PRIMARY KEY,
+FIRST_NAME VARCHAR(50),
+LAST_NAME VARCHAR(50),
+EMAIL VARCHAR(80),
+PHONE VARCHAR(20),
+ACTIVE INT,
+STORE_ID INT,
+MANAGER_ID INT
+);
+
+
+
+select count(*) from PRODUCTION.BRANDS;  --9
+select count(*) from PRODUCTION.PRODUCTS;  ---321
+select count(*) from PRODUCTION.STOCKS; ---939
+select count(*) from PRODUCTION.CATEGORIES; ---7
+select count(*) from SALES.CUSTOMERS; --1445
+select count(*) from SALES.ORDERS;  ---1615
+select count(*) from SALES.STORES; --3
+select count(*) from SALES.ORDER_ITEMS; ---4772
+select count(*) from SALES.STAFFS;  --10
+
+ ---------------adding foreign key ---------------------
+
+
+---##-sales.staffs (store_id) -> sales.stores(storeid)
+
+ALTER TABLE sales.staffs ADD FOREIGN KEY (store_id) REFERENCES sales.stores(store_id);
+
+---sales.staffs (manager_id) -> sales.staffs (staff_id)
+
+ALTER TABLE sales.staffs ADD FOREIGN KEY (manager_id) REFERENCES
+sales.staffs(staff_id);
+
+---production. Products (category_id) -> production.categories (category_id)
+
+ALTER TABLE production.products ADD FOREIGN KEY (category_id) REFERENCES
+production.categories(category_id);
+
+--##production.products(brand_id) -> production.brands (brand_id)
+
+ALTER TABLE production.products ADD FOREIGN KEY (brand_id) REFERENCES production.brands(brand_id);
+
+--##sales.orders (customer_id) -> sales.customers (customer_id)
+
+ALTER TABLE sales.orders ADD FOREIGN KEY (customer_id) REFERENCES
+sales.customers(customer_id);
+
+--sales.orders(store_id) -> sales.stores (store_id)
+
+ALTER TABLE sales.orders ADD FOREIGN KEY (store_id) REFERENCES sales.stores(store_id);
+
+--sales.orders (staff_id) -> sales.staffs (staff_id)
+
+ALTER TABLE sales.orders ADD FOREIGN KEY (staff_id) REFERENCES sales.staffs(staff_id);
+
+---sales.order_items(order_id) -> sales.orders (order_id)
+
+ALTER TABLE sales.order_items ADD FOREIGN KEY (order_id) REFERENCES
+sales.orders(order_id);
+
+----sales.order_items (product_id) -> production.products (product_id)
+
+ALTER TABLE sales.order_items ADD FOREIGN KEY (product_id) REFERENCES
+production.products(product_id);
+
+----production.stocks (store_id) -> sales.stores (store_id)
+
+ALTER TABLE production.stocks ADD FOREIGN KEY (store_id) REFERENCES
+sales.stores(store_id);
+
+----production.stocks (product_id) -> production.products (product_id)
+
+ALTER TABLE production.stocks ADD FOREIGN KEY (product_id) REFERENCES
+production.products(product_id);
